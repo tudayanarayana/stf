@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.snaplogic.snaps</groupId>
     <artifactId>stf</artifactId>
-    <version>1-${sl_build}</version>
+    <version>4.9.0.M1</version>
     <packaging>jar</packaging>
 
     <name>stf</name>
@@ -405,15 +405,16 @@
             (and become accessible on the Snaplex/JCC after deployment).
         -->
         <snap.classes>
+            com.snaplogic.snaps.Get
         </snap.classes>
         <!-- This identifies the classes which represent the actual Accounts
             (and become accessible on the Snaplex/JCC after deployment).
         -->
         <!-- Enter your cc key prefix from keys.properties -->
-        <key.prefix>cc</key.prefix>
+        <key.prefix>local-snapadmin</key.prefix>
         <!-- This is the user name that is authorized to deploy Snap Packs-->
-        <user>tudayanarayana@snaplogic.com</user>
-        <sl_build>0001</sl_build>
+        <user>snapadmin@snaplogic.com</user>
+        <sl_build>SNAPSHOT</sl_build>
         <VERSION>1</VERSION>
 
         <injector.version>4.0</injector.version>
@@ -543,6 +544,14 @@
             <artifactId>jfilesystem</artifactId>
             <version>${japi.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
