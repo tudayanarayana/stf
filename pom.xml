@@ -405,7 +405,7 @@
             (and become accessible on the Snaplex/JCC after deployment).
         -->
         <snap.classes>
-            com.snaplogic.snaps.Get
+            com.snaplogic.snaps.stf.Get
         </snap.classes>
         <!-- This identifies the classes which represent the actual Accounts
             (and become accessible on the Snaplex/JCC after deployment).

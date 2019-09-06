@@ -1,4 +1,4 @@
-package com.snaplogic.snaps;
+package com.snaplogic.snaps.stf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings({"ALL", "unused"})
 @General(title = "STF Get", purpose = "To fetch data from given URL")
 @Inputs(max = 1, accepts = {ViewType.DOCUMENT})
 @Outputs(min = 1, max = 1, offers = {ViewType.DOCUMENT})
-@Version(snap = 1)
+@Version()
 @Category(snap = SnapCategory.READ)
 public class Get extends SimpleSnap {
 
@@ -37,18 +37,18 @@ public class Get extends SimpleSnap {
     private final RestHttpClient restHttpClient = new RestHttpClient();
     private static final int SOCKET_TIMEOUT_SEC = 900;
     private static final int CONN_TIMEOUT_SEC = 30;
-    protected final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ERR_UNSUPPORTED_HTTP_METHOD_MSG = "Unsupported HTTP method: %s";
     @Inject
-    protected OutputViews outputViews;
+    private OutputViews outputViews;
     @Inject
-    protected DocumentUtility documentUtility;
+    private DocumentUtility documentUtility;
 
-    public String getUrl() {
+    private String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    private void setUrl(String url) {
         this.url = url;
     }
 
@@ -71,8 +71,8 @@ public class Get extends SimpleSnap {
         outputViews.write(documentUtility.newDocument(groupData));
     }
 
-    private HttpUriRequest createHttpRequest(String httpMethod, String url) {
-        switch (httpMethod) {
+    private HttpUriRequest createHttpRequest(String url) {
+        switch (HttpGet.METHOD_NAME) {
             case HttpGet.METHOD_NAME:
                 return new HttpGet(url);
             case HttpPost.METHOD_NAME:
@@ -84,16 +84,16 @@ public class Get extends SimpleSnap {
             case HttpPatch.METHOD_NAME:
                 return new HttpPatch(url);
             default:
-                log.error("Unsupported HTTP method {} encountered", httpMethod);
+                log.error("Unsupported HTTP method {} encountered", HttpGet.METHOD_NAME);
                 throw new ExecutionException(String.format(ERR_UNSUPPORTED_HTTP_METHOD_MSG,
-                        httpMethod))
+                        HttpGet.METHOD_NAME))
                         .withResolutionAsDefect();
         }
     }
 
     private Map getGroupData(String url) {
         log.info("Fetching Group Data using GET URL provided by User");
-        HttpUriRequest httpRequest = createHttpRequest(HttpGet.METHOD_NAME, url);
+        HttpUriRequest httpRequest = createHttpRequest(url);
         HttpResponse httpResponse;
         Map map = Maps.newHashMap();
         try {
