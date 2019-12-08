@@ -1,53 +1,44 @@
 package com.snaplogic.snaps.stf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.snaplogic.api.ConfigurationException;
 import com.snaplogic.api.ExecutionException;
 import com.snaplogic.common.properties.builders.PropertyBuilder;
 import com.snaplogic.snap.api.*;
 import com.snaplogic.snap.api.capabilities.*;
-import com.snaplogic.snap.api.rest.RestHttpClient;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
+import com.snaplogic.snaps.stf.utils.RestUtil;
+
+import org.apache.http.*;
 import org.apache.http.client.methods.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({"ALL", "unused"})
-@General(title = "STF Get", purpose = "To fetch data from given URL")
+import static com.snaplogic.snaps.stf.Constants.*;
+import static com.snaplogic.snaps.stf.utils.RestUtil.RestResponseObject;
+
+@Version(snap = 1)
+@General(title = "Get", purpose = "To fetch data from given URL")
 @Inputs(max = 1, accepts = {ViewType.DOCUMENT})
 @Outputs(min = 1, max = 1, offers = {ViewType.DOCUMENT})
-@Version()
 @Category(snap = SnapCategory.READ)
 public class Get extends SimpleSnap {
-
-    private static final Logger log = LoggerFactory.getLogger(Get.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Get.class);
     private static final String GET_URL_FIELD_PROP = "getURL";
     private static final String GET_URL_FIELD_LABEL = "URL";
     private static final String GET_URL_FIELD_DESC = "URL used to place GET Request";
-    private static final String ERR_FETCHING_GROUP_DATA_MSG = "Error while fetching Group Data results.";
+
     private String url;
-    private final RestHttpClient restHttpClient = new RestHttpClient();
-    private static final int SOCKET_TIMEOUT_SEC = 900;
-    private static final int CONN_TIMEOUT_SEC = 30;
-    private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final String ERR_UNSUPPORTED_HTTP_METHOD_MSG = "Unsupported HTTP method: %s";
     @Inject
-    private OutputViews outputViews;
-    @Inject
-    private DocumentUtility documentUtility;
+    private RestUtil restUtil;
 
     private String getUrl() {
         return url;
     }
-
     private void setUrl(String url) {
         this.url = url;
     }
@@ -64,54 +55,48 @@ public class Get extends SimpleSnap {
         setUrl(propertyValues.get(GET_URL_FIELD_PROP));
     }
 
-    @Override
-    protected void process(Document document, String s) {
-        log.debug("GET URL provided by User: ", getUrl());
-        Map groupData = getGroupData(getUrl());
-        outputViews.write(documentUtility.newDocument(groupData));
-    }
-
-    private HttpUriRequest createHttpRequest(String url) {
-        switch (HttpGet.METHOD_NAME) {
-            case HttpGet.METHOD_NAME:
-                return new HttpGet(url);
-            case HttpPost.METHOD_NAME:
-                return new HttpPost(url);
-            case HttpPut.METHOD_NAME:
-                return new HttpPut(url);
-            case HttpDelete.METHOD_NAME:
-                return new HttpDelete(url);
-            case HttpPatch.METHOD_NAME:
-                return new HttpPatch(url);
-            default:
-                log.error("Unsupported HTTP method {} encountered", HttpGet.METHOD_NAME);
-                throw new ExecutionException(String.format(ERR_UNSUPPORTED_HTTP_METHOD_MSG,
-                        HttpGet.METHOD_NAME))
-                        .withResolutionAsDefect();
+    private Header[] generateHeaders(List<Header> specificHeaders) {
+        List<Header> headers = new ArrayList<>();
+        if (specificHeaders != null && !specificHeaders.isEmpty()) {
+            headers.addAll(specificHeaders);
         }
+        return headers.toArray(new Header[0]);
     }
 
-    private Map getGroupData(String url) {
-        log.info("Fetching Group Data using GET URL provided by User");
-        HttpUriRequest httpRequest = createHttpRequest(url);
-        HttpResponse httpResponse;
-        Map map = Maps.newHashMap();
+    private Map getData(String url) {
+        LOGGER.info("Fetching Data using GET URL provided by User");
+        Map map;
+        List<Header> specificHeaders = new ArrayList<>();
+        Header[] headers = generateHeaders(specificHeaders);
         try {
-            httpResponse = restHttpClient.executeRequest(httpRequest, false,
-                    SOCKET_TIMEOUT_SEC, CONN_TIMEOUT_SEC, true);
-            StatusLine statusLine = httpResponse.getStatusLine();
-            HttpEntity entity = httpResponse.getEntity();
-            if (statusLine != null &&
-                    statusLine.getStatusCode() >= HttpStatus.SC_OK &&
-                    statusLine.getStatusCode() <= HttpStatus.SC_ACCEPTED &&
-                    entity != null) {
-                map = OBJECT_MAPPER.readValue(entity.getContent(), Map.class);
+            RestResponseObject restResponseObject = restUtil.invokeHttpCall(HttpPost.METHOD_NAME,
+                    null, url,RESPONSE_TYPE_MAP);
+            StatusLine statusLine = restResponseObject.getStatusLine();
+            if (statusLine != null) {
+                LOGGER.error("Failed creating a batch with Http response code {} " +
+                                "and reason {}",
+                        statusLine.getStatusCode(),
+                        statusLine.getReasonPhrase());
+                throw new SnapDataException(ERR_FETCHING_DATA_MSG)
+                        .withReason(String.format(COMMON_REASON,
+                                statusLine.getStatusCode(),
+                                statusLine.getReasonPhrase()))
+                        .withResolution(COMMON_RESOLUTION);
+            } else {
+                map = restResponseObject.getBody();
             }
         } catch (IOException ioException) {
-            log.error("Error while fetching Group Data", ioException);
-            throw new ExecutionException(ioException, ERR_FETCHING_GROUP_DATA_MSG)
+            LOGGER.error("Error while fetching Group Data", ioException);
+            throw new ExecutionException(ioException, ERR_FETCHING_DATA_MSG)
                     .formatWith(ioException.getMessage());
         }
         return map;
+    }
+
+    @Override
+    protected void process(Document document, String s) {
+        LOGGER.debug("GET URL provided by User: ", getUrl());
+        Map groupData = getData(getUrl());
+        outputViews.write(documentUtility.newDocument(groupData));
     }
 }

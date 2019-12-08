@@ -7,7 +7,6 @@
     <artifactId>stf</artifactId>
     <version>4.9.0.M1</version>
     <packaging>jar</packaging>
-
     <name>stf</name>
         <repositories>
         <repository>
@@ -54,7 +53,6 @@
             <name>Twitter Maven Repository</name>
             <url>https://maven.twttr.com/</url>
         </repository>
-        <!-- Disabled Repositories -->
         <repository>
             <id>ebmws-public.release</id>
             <name>eBMWebsourcing Public Repository</name>
@@ -89,7 +87,6 @@
             </snapshots>
         </repository>
     </repositories>
-    <!-- Profiles -->
     <profiles>
         <profile>
             <id>develop</id>
@@ -278,7 +275,6 @@
             </pluginRepositories>
         </profile>
     </profiles>
-    <!-- Snap zip assembly descriptor -->
     <build>
         <finalName>${project.artifactId}</finalName>
         <pluginManagement>
@@ -314,7 +310,6 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <!-- Snaplogic Maven Plugins -->
             <plugin>
                 <groupId>com.snaplogic.tools</groupId>
                 <artifactId>snappack-installer</artifactId>
@@ -328,7 +323,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Assembly instructions for creating snap zip -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -349,7 +343,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Read the version from the directives file -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
@@ -377,8 +370,6 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <!-- This will add the build number and version in the resources file. Don't
-                                     change the formatting below. -->
                                 <echo file="${project.build.directory}/classes/build.properties">
                                     build_number=${sl_build}
                                     snap_pack_version=${VERSION}
@@ -401,27 +392,21 @@
         <jar.finalName>stf-${VERSION}-${sl_build}</jar.finalName>
         <snap>stf</snap>
         <package.build_no>${sl_build}</package.build_no>
-        <!-- This identifies the classes which represent the actual Snaps
-            (and become accessible on the Snaplex/JCC after deployment).
-        -->
         <snap.classes>
-            com.snaplogic.snaps.stf.Get
+            com.snaplogic.snaps.stf.Get,
+            com.snaplogic.snaps.stf.GenerateSchemaFromFile,
+            com.snaplogic.snaps.stf.MapEntitiesFromFile,
+            com.snaplogic.snaps.stf.IsEntityPartOfGroup,
+            com.snaplogic.snaps.stf.IsContextTrue
         </snap.classes>
-        <!-- This identifies the classes which represent the actual Accounts
-            (and become accessible on the Snaplex/JCC after deployment).
-        -->
-        <!-- Enter your cc key prefix from keys.properties -->
         <key.prefix>local-snapadmin</key.prefix>
-        <!-- This is the user name that is authorized to deploy Snap Packs-->
         <user>snapadmin@snaplogic.com</user>
         <sl_build>SNAPSHOT</sl_build>
         <VERSION>1</VERSION>
-
         <injector.version>4.0</injector.version>
         <jackson.version>2.4.4</jackson.version>
         <jsdk.version>4.0</jsdk.version>
         <japi.version>4.9.0.M1</japi.version>
-
         <commons-io.version>2.4</commons-io.version>
         <guava.version>19.0</guava.version>
         <jruby.version>1.7.3</jruby.version>
@@ -430,12 +415,6 @@
     </properties>
         <dependencyManagement>
         <dependencies>
-            <!--
-            Other libraries
-            Note that the SnapLogic Platform does make the below dependencies available at runtime,
-            so the <provided> scope may be used too. It is possible however for a conflict
-            to arise if this version deviates from what the Platform provides.
-            -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -484,9 +463,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <!-- Dependencies -->
     <dependencies>
-        <!-- SnapLogic JSDK dependencies -->
         <dependency>
             <groupId>com.snaplogic</groupId>
             <artifactId>jsdk</artifactId>
@@ -537,6 +514,14 @@
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpcore</artifactId>
+                    </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -564,7 +549,6 @@
             <version>${jsdk.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -594,5 +578,20 @@
             <artifactId>jxml</artifactId>
             <version>${japi.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.3.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
-    </project>
+</project>
