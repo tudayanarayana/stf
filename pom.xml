@@ -397,7 +397,8 @@
             com.snaplogic.snaps.stf.GenerateSchemaFromFile,
             com.snaplogic.snaps.stf.MapEntitiesFromFile,
             com.snaplogic.snaps.stf.IsEntityPartOfGroup,
-            com.snaplogic.snaps.stf.IsContextTrue
+            com.snaplogic.snaps.stf.IsContextTrue,
+            com.snaplogic.snaps.stf.GetAnalyticsQueryResults
         </snap.classes>
         <key.prefix>local-snapadmin</key.prefix>
         <user>snapadmin@snaplogic.com</user>

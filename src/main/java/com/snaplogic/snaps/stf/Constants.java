@@ -16,4 +16,5 @@ public class Constants {
                                                      "mappingId=%s";
     static final String IS_ENTITY_PART_OF_GROUP_URL = "http://192.168.28.37:8282/TFW//v1/%s/entity/groups/%s/%s";
     static final String IS_CONTEXT_TRUE_URL = "http://192.168.28.37:8282/TFW/v1/%s/context/evaluation/%s";
+    static final String GET_ANALYTICS_QUERY_RESULTS_URL = "http://192.168.28.37:8282/TFW/v1/%s/analytics/query/data/%s";
 }
