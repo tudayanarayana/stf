@@ -405,7 +405,7 @@
         <sl_build>SNAPSHOT</sl_build>
         <VERSION>1</VERSION>
         <injector.version>4.0</injector.version>
-        <jackson.version>2.4.4</jackson.version>
+        <jackson.version>2.11.0</jackson.version>
         <jsdk.version>4.0</jsdk.version>
         <japi.version>4.9.0.M1</japi.version>
         <commons-io.version>2.4</commons-io.version>
